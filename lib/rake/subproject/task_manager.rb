@@ -1,39 +1,29 @@
 require "rake/subproject/version"
 
-module Rake::Subproject::TaskManager
-  class RakeRunner
-    include FileUtils
+module Rake::Subproject
+  module TaskManager
 
-    def run(*args)
-      ruby '-S', 'rake', *args
+    def define_subproject(path)
+      return if runners[path]
+      runners[path] = Rake::Subproject::TaskRunner.new(path)
     end
-  end
 
-  def define_subproject(path)
-    subprojects << path
-    subproject_semaphores[path] ||= Mutex.new
-  end
-
-  def subprojects
-    @subprojects ||= Set.new
-  end
-
-  def [](task_name, scopes=nil)
-    self.lookup(task_name, scopes) or 
-    subprojects.each do |subproject|
-      task_name.match /^#{subproject}[\/\:](.*)/ do |md|
-        return Rake::Task.define_task task_name do |t|
-          subproject_semaphores[subproject].synchronize do
-            RakeRunner.new.run md[1], {chdir: subproject}, {verbose: false}
+    def [](task_name, scopes=nil)
+      self.lookup(task_name, scopes) or 
+      runners.each do |dir, subproject|
+        task_name.match /^#{dir}[\/\:](.*)/ do |md|
+          return Rake::Task.define_task task_name do |t|
+            subproject.invoke_task(md[1])
           end
         end
       end
+      super
     end
-    super
-  end
-  private
 
-  def subproject_semaphores
-    @subproject_semaphores ||= {}.extend(MonitorMixin)
+    private
+
+    def runners
+      @runners ||= {}
+    end
   end
 end

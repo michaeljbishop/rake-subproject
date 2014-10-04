@@ -9,8 +9,15 @@ module Rake::Subproject::Remote
     def self.with_each_session(port, &block)
       return unless block_given?
       session_manager = self.new(port)
-      session_manager.start(&block)
+      threads = Set.new
+      session_manager.start do |session|
+        threads << Thread.start do
+          block.call(session)
+        end
+      end
     ensure
+      log "Waiting for #{threads.count} threads"
+      threads.each(&:join)
       session_manager.close
     end
     

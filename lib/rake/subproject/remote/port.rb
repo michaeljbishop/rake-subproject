@@ -12,6 +12,7 @@ module Rake::Subproject::Remote
     end
   
     DELIMITER = "\0"
+
     def initialize(io, name = nil)
       fail ArgumentError, "Requires an IO object" unless io.kind_of?(IO)
       @io = io

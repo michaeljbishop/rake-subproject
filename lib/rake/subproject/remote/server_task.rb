@@ -15,6 +15,7 @@ task :'subproject:server:start', [:fd] do |t, args|
     log "Starting server on #{port.inspect}\n"
 
     Rake::Subproject::Remote::SessionManager.with_each_session(port) do |session|
+
       log "Received session"
       request = session.read
       message = request['message']
@@ -29,12 +30,16 @@ task :'subproject:server:start', [:fd] do |t, args|
 
       log "Got task args: '#{task_args}'"
 
-      log "Executing task #{task_name}"
-      Rake::Task[task_name].invoke(*task_args['array'])
-      log "#{task_name} complete!"
-
-      session.write(message: 'task_complete')
-      session.close
+      begin
+        log "Executing task #{task_name}"
+        Rake::Task[task_name].invoke(*task_args['array'])
+        log "#{task_name} complete!"
+        session.write(message: 'task_complete')
+      rescue RuntimeError => e
+        session.write(message: 'task_failed', exception:{message: e.message, backtrace: e.backtrace})
+      ensure
+        session.close
+      end
     end
   end
 end

@@ -49,10 +49,9 @@ module Rake::Subproject::Remote
         
       end
     rescue EOFError => e
-#       $stderr.print "#{e.message}\n#{e.backtrace.join("\n")}\n"
-#       @port.close
+      log "#{e.message}\n#{e.backtrace.join("\n")}"
     rescue IOError => e
-#       $stderr.print "#{e.message}\n#{e.backtrace.join("\n")}\n"
+      log "#{e.message}\n#{e.backtrace.join("\n")}"
 #       raise
     end
     
@@ -71,8 +70,7 @@ module Rake::Subproject::Remote
     end
     
     def close
-#       log "session manager: closing #{@port.inspect}"
-#       @port.close
+      log "session manager: closing #{@port.inspect}"
     end
 
     private

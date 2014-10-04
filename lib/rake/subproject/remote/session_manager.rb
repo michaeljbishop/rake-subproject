@@ -49,9 +49,9 @@ module Rake::Subproject::Remote
         
       end
     rescue EOFError => e
-      log "#{e.message}\n#{e.backtrace.join("\n")}"
+#       log "#{e.message}\n#{e.backtrace.join("\n")}"
     rescue IOError => e
-      log "#{e.message}\n#{e.backtrace.join("\n")}"
+#       log "#{e.message}\n#{e.backtrace.join("\n")}"
 #       raise
     end
     

@@ -1,5 +1,6 @@
 module Rake::Subproject::Remote
   class SessionManager
+
     def initialize(port)
       fail ArgumentError, "Requires a Port object" unless port.kind_of?(Rake::Subproject::Remote::Port)
       @port = port
@@ -10,14 +11,18 @@ module Rake::Subproject::Remote
       return unless block_given?
       session_manager = self.new(port)
       threads = Set.new
+      mutex = Mutex.new
       session_manager.start do |session|
-        threads << Thread.start do
-          block.call(session)
+        mutex.synchronize do
+          threads << thread = Thread.start do
+            block.call(session)
+            mutex.synchronize { threads.delete thread }
+          end
         end
       end
     ensure
       log "Waiting for #{threads.count} threads"
-      threads.each(&:join)
+      mutex.synchronize { threads.dup }.each(&:join)
       session_manager.close
     end
     

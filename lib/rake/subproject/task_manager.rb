@@ -12,8 +12,9 @@ module Rake::Subproject
       self.lookup(task_name, scopes) or 
       runners.each do |dir, subproject|
         task_name.match /^#{dir}[\/\:](.*)/ do |md|
-          return Rake::Task.define_task task_name do |t|
-            subproject.invoke_task(md[1])
+        # Here, we need a remote task class that can receive the 
+          return Rake::Task.define_task task_name do |t, args|
+            subproject.invoke_task(md[1], args)
           end
         end
       end

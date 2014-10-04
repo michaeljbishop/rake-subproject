@@ -1,5 +1,8 @@
 require 'rake'
 
+require 'rake/subproject/remote/port'
+require 'rake/subproject/remote/session_manager'
+require 'rake/subproject/remote/session'
 require 'rake/subproject/task_runner'
 require 'rake/subproject/task_manager'
 require 'rake/subproject/ext/application'

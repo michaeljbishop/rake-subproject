@@ -4,7 +4,7 @@ module Rake::Subproject
     attr_reader :directory
 
     include FileUtils
-    include Rake::Subproject::Remote
+    include Rake::Subproject::Client
     
     def initialize(directory)
       @directory = directory
@@ -29,7 +29,7 @@ module Rake::Subproject
             # Do not search parent directories for the Rakefile.
           "--no-search",
             # Include LIBDIR in the search path for required modules.
-          "--libdir", File.dirname(__FILE__)+"/remote",
+          "--libdir", File.dirname(__FILE__)+ "/server",
             # Require MODULE before executing rakefile.
           "-r", "server_task", "subproject:server:start[#{child_socket.fileno}]",
           {child_socket.fileno => child_socket, :chdir => @directory})

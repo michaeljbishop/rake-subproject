@@ -1,20 +1,24 @@
+$stderr.puts "loading..."
+
 require 'rake'
-require_relative 'port'
-require_relative 'session'
-require_relative 'session_manager'
+require 'json'
 
-private
-def log(message)
-  $stderr.print "#{message}\n" if false
-end
+module Rake::Subproject::Server ; end
+ENCLOSINGMODULE = Rake::Subproject::Server
+Dir["#{File.dirname(__FILE__)}/../_network/*.rb"].each {|rb| require rb }
 
-task :'subproject:server:start', [:fd] do |t, args|
-  Rake::Subproject::Remote::Port.open(args[:fd].to_i, 'r+') do |port|
+Rake::Task.define_task(:'subproject:server:start', [:fd]) do |t, args|
+  include Rake::Subproject::Server
+  Port.open(args[:fd].to_i, 'r+') do |port|
+
+    def log(message)
+      $stderr.print "#{message}\n" if false
+    end
 
     port.name = "server"
     log "Starting server on #{port.inspect}\n"
 
-    Rake::Subproject::Remote::SessionManager.with_each_session(port) do |session|
+    SessionManager.with_each_session(port) do |session|
 
       log "Received session"
       request = session.read
@@ -43,3 +47,5 @@ task :'subproject:server:start', [:fd] do |t, args|
     end
   end
 end
+
+$stderr.puts "...loaded"

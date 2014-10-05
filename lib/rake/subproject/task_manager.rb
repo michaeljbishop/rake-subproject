@@ -1,5 +1,3 @@
-require "rake/subproject/version"
-
 module Rake::Subproject
   module TaskManager
 

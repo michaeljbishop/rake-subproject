@@ -1,8 +1,10 @@
 require 'rake'
+require 'json'
 
-require 'rake/subproject/remote/port'
-require 'rake/subproject/remote/session_manager'
-require 'rake/subproject/remote/session'
+module Rake::Subproject
+end
+
+require 'rake/subproject/client'
 require 'rake/subproject/task_runner'
 require 'rake/subproject/task_manager'
 require 'rake/subproject/ext/application'

@@ -1,4 +1,3 @@
-module ENCLOSINGMODULE
 class SessionManager
 
   def initialize(port)
@@ -97,6 +96,4 @@ class SessionManager
   def log(message)
     self.class.log(message)
   end
-end
-
 end

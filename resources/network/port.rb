@@ -1,4 +1,3 @@
-module ENCLOSINGMODULE
 class Port
   attr_accessor :name
 
@@ -48,5 +47,4 @@ class Port
   def log(message)
     $stderr.print "#{message}\n" if false
   end
-end
 end

@@ -1,11 +1,9 @@
-$stderr.puts "loading..."
-
 require 'rake'
 require 'json'
 
-module Rake::Subproject::Server ; end
-ENCLOSINGMODULE = Rake::Subproject::Server
-Dir["#{File.dirname(__FILE__)}/../_network/*.rb"].each {|rb| require rb }
+require_relative 'port'
+require_relative 'session'
+require_relative 'session_manager'
 
 Rake::Task.define_task(:'subproject:server:start', [:fd]) do |t, args|
   include Rake::Subproject::Server
@@ -47,5 +45,3 @@ Rake::Task.define_task(:'subproject:server:start', [:fd]) do |t, args|
     end
   end
 end
-
-$stderr.puts "...loaded"

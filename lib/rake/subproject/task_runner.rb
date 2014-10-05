@@ -31,7 +31,7 @@ module Rake::Subproject
             # Include LIBDIR in the search path for required modules.
           "--libdir", File.dirname(__FILE__)+ "/server",
             # Require MODULE before executing rakefile.
-          "-r", "server_task", "subproject:server:start[#{child_socket.fileno}]",
+          "-r", "task", "subproject:server:start[#{child_socket.fileno}]",
           {child_socket.fileno => child_socket, :chdir => @directory})
       end
       child_socket.close

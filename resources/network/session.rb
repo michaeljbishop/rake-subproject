@@ -1,4 +1,3 @@
-module ENCLOSINGMODULE
 class Session
   def initialize(manager, id = nil)
     @id = id
@@ -20,5 +19,4 @@ class Session
   def close
     @manager.send(:close_session, self)
   end
-end
 end

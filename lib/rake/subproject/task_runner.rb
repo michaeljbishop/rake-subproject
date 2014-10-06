@@ -16,6 +16,7 @@ module Rake::Subproject
       port = Port.new(parent_socket, "client")
       @session_manager = SessionManager.new(port)
       thread = Thread.new { @session_manager.start } 
+      
       at_exit do
         @session_manager.close
         port.close
@@ -34,6 +35,13 @@ module Rake::Subproject
           "-r", "task", "subproject:server:start[#{child_socket.fileno}]",
           {child_socket.fileno => child_socket, :chdir => @directory})
       end
+
+      ['TERM', 'KILL', 'INT'].each do |sig|
+        Signal.trap(sig) do
+          Process.kill(sig, @server_pid)
+        end
+      end
+      
       child_socket.close
     end
     

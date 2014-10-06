@@ -9,6 +9,12 @@ Rake::Task.define_task(:'subproject:server:start', [:fd]) do |t, args|
   include Rake::Subproject::Server
   Port.open(args[:fd].to_i, 'r+') do |port|
 
+    ['TERM', 'KILL', 'INT'].each do |sig|
+      Signal.trap(sig) do
+        port.close ; exit
+      end
+    end
+    
     def log(message)
       $stderr.print "#{message}\n" if false
     end

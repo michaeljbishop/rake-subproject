@@ -63,7 +63,7 @@ module Rake::Subproject
         session.write(message: 'invoke_task', name: name, args: {hash: args.to_hash, array: args.to_a})
         response = session.read
         if (response['message'] == 'task_failed')
-          e = ::RuntimeError.new(response['exception']['message'])
+          e = ::Rake::Subproject::Error.new(response['exception']['message'])
           e.set_backtrace(response['exception']['backtrace'] + Thread.current.backtrace)
           raise e
         end

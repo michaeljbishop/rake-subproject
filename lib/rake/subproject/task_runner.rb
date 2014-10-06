@@ -23,8 +23,7 @@ module Rake::Subproject
         thread.join
       end
 
-      Bundler.with_clean_env do
-        @server_pid = Process.spawn(
+      rake_args = [
           "bundle", "exec", "--keep-file-descriptors",
           "rake",
             # Do not search parent directories for the Rakefile.
@@ -33,11 +32,24 @@ module Rake::Subproject
           "--libdir", File.dirname(__FILE__)+ "/server",
             # Require MODULE before executing rakefile.
           "-r", "task", "subproject:server:start[#{child_socket.fileno}]",
-          {child_socket.fileno => child_socket, :chdir => @directory})
+          {child_socket.fileno => child_socket, :chdir => @directory}
+      ]
+
+      Bundler.with_clean_env do
+        @server_pid = Process.spawn(*rake_args)
+      end
+
+      # In case the rake subprocess failed (perhaps an incorrect rakefile)
+      # output a message and exit.
+      Signal.trap('CHLD') do
+        $stderr.print "Subproject process died. Here's the invocation:\n" + rake_args.join(" ") + "\n"
+        exit
       end
 
       ['TERM', 'KILL', 'INT'].each do |sig|
         Signal.trap(sig) do
+          # If we are the ones killing the process, do not output a message
+          Signal.trap('CHLD', 'IGNORE')
           Process.kill(sig, @server_pid)
         end
       end

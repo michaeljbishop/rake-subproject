@@ -6,8 +6,15 @@ module Rake::Subproject
     include FileUtils
     include Rake::Subproject::Client
     
-    def initialize(directory)
-      @directory = directory
+    def initialize(path)
+      raise "Subproject path '#{path}' does not exist" unless File.exist?(path)
+      if File.directory?(path)
+        @directory = path
+      else
+        rakefile = path
+        @directory = File.dirname(path)
+      end
+
       @@rake_env ||= ARGV.each_with_object({}) do |arg, hash|
         hash[$1] = $2 if arg =~ /^(\w+)=(.*)$/m
       end
@@ -32,8 +39,10 @@ module Rake::Subproject
           "--libdir", File.dirname(__FILE__)+ "/server",
             # Require MODULE before executing rakefile.
           "-r", "task", "subproject:server:start[#{child_socket.fileno}]",
-          {child_socket.fileno => child_socket, :chdir => @directory}
+          
       ]
+      rake_args = rake_args + ['--rakefile', File.basename(rakefile)] unless rakefile.nil?
+      rake_args << {child_socket.fileno => child_socket, :chdir => @directory}
 
       Bundler.with_clean_env do
         @server_pid = Process.spawn(*rake_args)

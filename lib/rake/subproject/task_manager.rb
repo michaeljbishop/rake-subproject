@@ -2,8 +2,12 @@ module Rake::Subproject
   module TaskManager
 
     def define_subproject(path)
+      raise "Subproject path '#{path}' does not exist" unless File.exist?(path)
+
+      directory = File.directory?(path) ? path : File.dirname(path)
+
       return if runners[path]
-      runners[path] = Rake::Subproject::TaskRunner.new(path)
+      runners[directory] = Rake::Subproject::TaskRunner.new(path)
     end
 
     def [](task_name, scopes=nil)

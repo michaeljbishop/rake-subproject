@@ -58,7 +58,7 @@ class SessionManager
     return unless block_given?
     yield session = create_session
   ensure
-    session.close
+    session.close unless session.nil?
   end
   
   def create_session

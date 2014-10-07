@@ -1,5 +1,5 @@
 module Rake
-  class Application
+  class Application #:nodoc: all
     prepend Subproject::TaskManager
   end
 end

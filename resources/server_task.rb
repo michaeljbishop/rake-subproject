@@ -15,7 +15,7 @@ Rake::Task.define_task(:'subproject:server:start', [:fd]) do |t, args|
       end
     end
     
-    def log(message)
+    def log(message) #:nodoc: all
       $stderr.print "#{message}\n" if false
     end
 

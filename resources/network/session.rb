@@ -1,4 +1,4 @@
-class Session
+class Session #:nodoc: all
   def initialize(manager, id = nil)
     @id = id
     @manager = manager

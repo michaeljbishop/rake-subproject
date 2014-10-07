@@ -1,6 +1,6 @@
 require 'json'
 module Rake::Subproject
-  class TaskRunner
+  class TaskRunner #:nodoc: all
     attr_reader :directory
 
     include FileUtils

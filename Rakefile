@@ -13,7 +13,7 @@ task :default => :spec
   FileList["resources/network/*.rb"].each do |path|
     file "#{dir}/#{File.basename(path)}" => "lib/rake/subproject/#{name.downcase}" do |t|
       File.open(t.name, 'w') do |f|
-        f.puts "module Rake::Subproject::#{name}"
+        f.puts "module Rake::Subproject::#{name} #:nodoc: all"
         f.puts File.read(path)
         f.puts "end"
       end

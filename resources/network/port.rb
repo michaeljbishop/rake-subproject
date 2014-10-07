@@ -1,4 +1,4 @@
-class Port
+class Port #:nodoc: all
   attr_accessor :name
 
   def self.open(fd, option)

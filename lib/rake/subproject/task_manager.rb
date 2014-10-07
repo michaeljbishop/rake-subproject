@@ -1,5 +1,5 @@
 module Rake::Subproject
-  module TaskManager
+  module TaskManager #:nodoc: all
 
     def define_subproject(path)
       raise "Subproject path '#{path}' does not exist" unless File.exist?(path)

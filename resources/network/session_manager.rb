@@ -1,4 +1,4 @@
-class SessionManager
+class SessionManager #:nodoc: all
 
   def initialize(port)
     fail ArgumentError, "Requires a Port object" unless port.kind_of?(Port)

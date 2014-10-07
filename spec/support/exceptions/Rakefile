@@ -1,0 +1,5 @@
+require 'rake/subproject'
+
+subproject 'foo'
+
+task :exception => 'foo:exception'

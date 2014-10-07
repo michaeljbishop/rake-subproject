@@ -7,11 +7,10 @@ describe Rake::Subproject do
     Rake::Subproject::VERSION.should_not be_nil
   end
 
-  it 'should do something useful' do
-    false.should eq(true)
-  end
-
   it "accepts the #subproject call" do
-    subproject('test')
+    Dir.chdir("#{SUPPORT_DIR}/exceptions") do
+      load "Rakefile"
+      expect { Rake.application.lookup(:exception).invoke }.to raise_error(Rake::Subproject::Error)
+    end
   end
 end

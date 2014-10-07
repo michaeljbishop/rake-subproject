@@ -43,7 +43,7 @@ Rake::Task.define_task(:'subproject:server:start', [:fd]) do |t, args|
         Rake::Task[task_name].invoke(*task_args['array'])
         log "#{task_name} complete!"
         session.write(message: 'task_complete')
-      rescue RuntimeError => e
+      rescue StandardError => e
         session.write(message: 'task_failed', exception:{message: e.message, backtrace: e.backtrace})
       ensure
         session.close

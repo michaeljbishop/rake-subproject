@@ -1,0 +1,4 @@
+task :exception do
+  raise
+end
+

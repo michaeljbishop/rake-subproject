@@ -1,0 +1,6 @@
+require 'rake/subproject'
+
+subproject 'bar'
+
+task :exception => 'bar:exception'
+

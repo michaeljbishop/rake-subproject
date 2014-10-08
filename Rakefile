@@ -13,11 +13,15 @@ task :default => :spec
   FileList["resources/network/*.rb"].each do |path|
     file "#{dir}/#{File.basename(path)}" => "lib/rake/subproject/#{name.downcase}" do |t|
       File.open(t.name, 'w') do |f|
-        f.puts "module Rake::Subproject::#{name} #:nodoc: all"
-        f.puts File.read(path)
-        f.puts "end"
+        f.puts <<END
+module Rake::Subproject
+  module #{name} #:nodoc: all
+#{File.read(path)}  end
+end
+END
       end
     end
+
     namespace :build do
       task :library => "#{dir}/#{File.basename(path)}"
     end

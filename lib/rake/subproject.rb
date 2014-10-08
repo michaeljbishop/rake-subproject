@@ -1,6 +1,9 @@
 require 'rake'
 require 'json'
 
+module Rake::Subproject
+end
+
 require 'rake/subproject/client/port'
 require 'rake/subproject/client/session_manager'
 require 'rake/subproject/client/session'

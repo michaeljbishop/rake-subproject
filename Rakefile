@@ -38,3 +38,7 @@ namespace :build do
 end
 
 task :build => 'build:library'
+
+task :test => :'build:library' do
+  sh 'rspec', verbose: false
+end

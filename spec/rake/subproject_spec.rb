@@ -56,12 +56,13 @@ describe Rake::Subproject do
     
     it "waits for the test task" do
       task_time = 0.5
+      subproject_delay = 0.4
       foo_bar_task(<<-RAKE)
         sleep #{task_time}
       RAKE
-      start_time = Time.now.to_f
+      end_time = Time.now.to_f + task_time
       Rake::Task['foo:bar'].invoke
-      expect(Time.now.to_f).to be_within(0.4).of(start_time+task_time)
+      expect(Time.now.to_f).to be_between(end_time, end_time+subproject_delay)
     end
     
     it "propagates exceptions in one level" do

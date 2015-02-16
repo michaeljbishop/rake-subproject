@@ -53,9 +53,12 @@ module Rake::Subproject
         @server_pid = Process.spawn(*rake_args)
       end
 
-      (Set.new(Signal.list.keys) & Set.new(['TERM', 'KILL', 'INT'])).each do |sig|
-        Signal.trap(sig) do
-          Process.kill(sig, @server_pid)
+      ['TERM', 'KILL', 'INT'].each do |sig|
+        begin
+          Signal.trap(sig) do
+            Process.kill(sig, @server_pid)
+          end
+        rescue Errno::EINVAL
         end
       end
       

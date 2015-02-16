@@ -3,6 +3,25 @@ require 'tempfile'
 
 include Rake::DSL
 
+gem_root = Pathname.new(File.dirname(__FILE__) + "/../..").expand_path.to_path
+
+def foo_bar_task(str)
+  File.write("foo/Rakefile",<<-RAKE)
+    task 'bar' do |t|
+      #{str}
+    end
+  RAKE
+  subproject "foo"
+end
+    
+def foo_bar_baz_task(str)
+  File.write("foo/bar/Rakefile",<<-RAKE)
+    task 'baz' do |t|
+      #{str}
+    end
+  RAKE
+end
+    
 describe Rake::Subproject do
   it 'has a version number' do
     expect(Rake::Subproject::VERSION).to_not be_nil
@@ -16,6 +35,8 @@ describe Rake::Subproject do
     before do
       Dir.chdir(dir)
       FileUtils.mkdir("foo")
+      File.write("foo/Gemfile", "gem 'rake-subproject', :path => \'#{gem_root}\'")
+      FileUtils.mkdir("foo/bar")
     end
     
     after do
@@ -26,37 +47,49 @@ describe Rake::Subproject do
     end
     
     it "executes the test task" do
-      File.write("foo/Rakefile",<<-RAKE)
-        task 'foo.txt' do |t|
-          touch t.name, verbose:false
-        end
+      foo_bar_task(<<-RAKE)
+        touch t.name, verbose:false
       RAKE
-      subproject "foo"
-      Rake::Task['foo/foo.txt'].invoke
-      expect(File.exist?('foo/foo.txt')).to be_truthy
+      Rake::Task['foo:bar'].invoke
+      expect(File.exist?('foo/bar')).to be_truthy
     end
     
     it "waits for the test task" do
-      File.write("foo/Rakefile",<<-RAKE)
-        task 'foo.txt' do |t|
-          touch t.name, verbose:false
-        end
+      task_time = 0.5
+      foo_bar_task(<<-RAKE)
+        sleep #{task_time}
       RAKE
-      subproject "foo"
-      Rake::Task['foo/foo.txt'].invoke
-      expect(File.exist?('foo/foo.txt')).to be_truthy
+      start_time = Time.now.to_f
+      Rake::Task['foo:bar'].invoke
+      expect(Time.now.to_f).to be_within(0.4).of(start_time+task_time)
     end
     
-    it "propagates exceptions" do
-      File.write("foo/Rakefile",<<-RAKE)
-        task 'exception' do |t|
-          raise
-        end
+    it "propagates exceptions in one level" do
+      foo_bar_task(<<-RAKE)
+        raise
       RAKE
-      subproject "foo"
-      expect { Rake::Task['foo:exception'].invoke }.to raise_error(Rake::Subproject::Error)
+      expect { Rake::Task['foo:bar'].invoke }.to raise_error(Rake::Subproject::Error)
     end
-
+ 
+    describe "with two-levels of hierarchy" do
+      before do
+        File.write("foo/Rakefile",<<-RAKE)
+          require 'rake/subproject'
+          subproject "bar"
+        RAKE
+        subproject "foo"
+      end
+    
+      it "propagates exceptions" do
+        foo_bar_baz_task(<<-RAKE)
+          raise
+        RAKE
+        begin
+          Rake::Task['foo:bar:baz'].invoke
+        rescue Rake::Subproject::Error => e
+          expect(e.backtrace[0]).to match("foo/bar/Rakefile:2")
+        end
+      end
+    end
   end
-  
 end

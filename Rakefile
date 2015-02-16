@@ -12,6 +12,7 @@ task :default => :spec
   CLEAN.include dir
   FileList["resources/network/*.rb"].each do |path|
     file "#{dir}/#{File.basename(path)}" => "lib/rake/subproject/#{name.downcase}" do |t|
+      print "creating #{t.name}\n"
       File.open(t.name, 'w') do |f|
         f.puts <<END
 module Rake::Subproject

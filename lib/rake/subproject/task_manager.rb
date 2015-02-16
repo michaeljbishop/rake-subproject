@@ -1,6 +1,11 @@
 module Rake::Subproject
   module TaskManager #:nodoc: all
 
+    def clear
+      @runners = nil
+      super
+    end
+
     def define_subproject(path)
       raise "Subproject path '#{path}' does not exist" unless File.exist?(path)
 
@@ -12,11 +17,11 @@ module Rake::Subproject
 
     def [](task_name, scopes=nil)
       self.lookup(task_name, scopes) or 
-      runners.each do |dir, subproject|
+      runners.each do |dir, runner|
         task_name.match /^#{dir}[\/\:](.*)/ do |md|
-        # Here, we need a remote task class that can receive the 
+          # Here, we need a remote task class that can receive the 
           return Rake::Task.define_task task_name do |t, args|
-            subproject.invoke_task(md[1], args)
+            runner.invoke_task(md[1], args)
           end
         end
       end

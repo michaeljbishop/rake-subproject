@@ -24,14 +24,14 @@ module Rake::Subproject
       @session_manager = SessionManager.new(port)
       thread = Thread.new { @session_manager.start } 
       
-      at_exit do
+      ObjectSpace.define_finalizer(self) do
         @session_manager.close
         port.close
         thread.join
       end
 
+      prefix = []
       rake_args = [
-          "bundle", "exec", "--keep-file-descriptors",
           "rake",
             # Do not search parent directories for the Rakefile.
           "--no-search",
@@ -41,7 +41,12 @@ module Rake::Subproject
           "-r", "task", "subproject:server:start[#{child_socket.fileno}]",
           
       ]
-      rake_args = rake_args + ['--rakefile', File.basename(rakefile)] unless rakefile.nil?
+      
+      if File.exist? "#{@directory}/Gemfile"
+        prefix = %W(bundle exec --keep-file-descriptors)
+      end
+      
+      rake_args = prefix + rake_args + ['--rakefile', File.basename(rakefile)] unless rakefile.nil?
       rake_args << {child_socket.fileno => child_socket, :chdir => @directory}
 
       Bundler.with_clean_env do

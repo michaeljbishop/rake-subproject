@@ -4,7 +4,6 @@ require 'tempfile'
 include Rake::DSL
 
 gem_root = Pathname.new(File.dirname(__FILE__) + "/../..").expand_path.to_path
-$stderr.puts "gem_root = #{gem_root}"
 $stderr.puts `find #{gem_root}`
 
 def foo_bar_task(str)
@@ -76,6 +75,7 @@ describe Rake::Subproject do
  
     describe "with two-levels of hierarchy" do
       before do
+        sh "bundle install", {chdir: "foo"}, {}
         File.write("foo/Rakefile",<<-RAKE)
           require 'rake/subproject'
           subproject "bar"

@@ -30,8 +30,13 @@ module Rake::Subproject
         thread.join
       end
 
-      prefix = []
-      rake_args = [
+      args = []
+
+      if File.exist? "#{@directory}/Gemfile"
+        args.push *%W(bundle exec --keep-file-descriptors)
+      end
+
+      args.push *[
           "rake",
             # Do not search parent directories for the Rakefile.
           "--no-search",
@@ -42,15 +47,11 @@ module Rake::Subproject
           
       ]
       
-      if File.exist? "#{@directory}/Gemfile"
-        prefix = %W(bundle exec --keep-file-descriptors)
-      end
-      
-      rake_args = prefix + rake_args + ['--rakefile', File.basename(rakefile)] unless rakefile.nil?
-      rake_args << {child_socket.fileno => child_socket, :chdir => @directory}
+      args.push *['--rakefile', File.basename(rakefile)] unless rakefile.nil?
+      args << {child_socket.fileno => child_socket, :chdir => @directory}
 
       Bundler.with_clean_env do
-        @server_pid = Process.spawn(*rake_args)
+        @server_pid = Process.spawn(*args)
       end
 
       ['TERM', 'KILL', 'INT'].each do |sig|

@@ -80,13 +80,13 @@ describe Rake::Subproject do
           require 'rake/subproject'
           subproject "bar"
         RAKE
-        subproject "foo"
       end
     
       it "propagates exceptions" do
         foo_bar_baz_task(<<-RAKE)
           raise
         RAKE
+        subproject "foo"
         begin
           Rake::Task['foo:bar:baz'].invoke
         rescue Rake::Subproject::Error => e

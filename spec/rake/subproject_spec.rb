@@ -70,11 +70,32 @@ describe Rake::Subproject do
       RAKE
       expect { Rake::Task['foo:bar'].invoke }.to raise_error(Rake::Subproject::Error)
     end
- 
+
+    pending "handles a non-starting server"
+
+    pending "times out when the server goes down"
+
+    pending "interoperates with ruby 1.9 and rake 0.9"
+
+    it "allows the subproject to depend on a separate gemset" do
+      File.write("foo/Gemfile", "source 'https://rubygems.org'\ngem 'multi_json', '~> 1.10.1'\n")
+      File.write("foo/Rakefile",<<-RAKE)
+        require 'multi_json'
+        task 'bar' do
+        end
+      RAKE
+      Bundler.with_clean_env do
+        sh "bundle install", {chdir: "foo"}, {}
+      end
+      subproject "foo"
+    end
+
     describe "with two-levels of hierarchy" do
       before do
-        File.write("foo/Gemfile", "gem 'rake-subproject', :path => \'#{gem_root}\'")
-        sh "bundle install", {chdir: "foo"}, {}
+        File.write("foo/Gemfile", "source 'https://rubygems.org'\ngem 'rake-subproject', :path => \'#{gem_root}\'")
+        Bundler.with_clean_env do
+          sh "bundle install", {chdir: "foo"}, {}
+        end
         File.write("foo/Rakefile",<<-RAKE)
           require 'rake/subproject'
           subproject "bar"

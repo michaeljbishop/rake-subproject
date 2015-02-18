@@ -78,23 +78,35 @@ describe Rake::Subproject do
     pending "interoperates with ruby 1.9 and rake 0.9"
 
     it "allows the subproject to depend on a separate gemset" do
-      File.write("foo/Gemfile", "source 'https://rubygems.org'\ngem 'multi_json', '~> 1.10.1'\n")
+        File.write("foo/Gemfile",<<-FILE)
+          source 'https://rubygems.org'
+          gem 'rake'
+          gem 'rake-subproject', :path => '#{gem_root}'
+          gem 'multi_json', '~> 1.10.1'
+        FILE
       File.write("foo/Rakefile",<<-RAKE)
         require 'multi_json'
-        task 'bar' do
+        task 'bar' do |t|
+          touch t.name, verbose:false
         end
       RAKE
       Bundler.with_clean_env do
-        sh "bundle install", {chdir: "foo"}, {}
+        sh "bundle install", {chdir: "foo"}, {verbose: false}
       end
       subproject "foo"
+      Rake::Task['foo:bar'].invoke
+      expect(File.exist?('foo/bar')).to be_truthy
     end
 
     describe "with two-levels of hierarchy" do
       before do
-        File.write("foo/Gemfile", "source 'https://rubygems.org'\ngem 'rake-subproject', :path => \'#{gem_root}\'")
+        File.write("foo/Gemfile",<<-FILE)
+          source 'https://rubygems.org'
+          gem 'rake'
+          gem 'rake-subproject', :path => '#{gem_root}'
+        FILE
         Bundler.with_clean_env do
-          sh "bundle install", {chdir: "foo"}, {}
+          sh "bundle install", {chdir: "foo"}, {verbose: false}
         end
         File.write("foo/Rakefile",<<-RAKE)
           require 'rake/subproject'
